@@ -47,35 +47,73 @@ console.log(MY_FAVORITE_BRANDS[0]);
 
 // 🎯 TODO: Number of products
 // 1. Create a variable and assign it the number of products
+var nbOfProduct = marketplace.length;
 // 2. Log the variable
-
+console.log(nbOfProduct)
 
 // 🎯 TODO: Brands name
 // 1. Create a variable and assign it the list of brands name only
+const brandList =[];
+var count=0
+for (let step =0; step < nbOfProduct;step++)
+{
+    if(!brandList.includes(marketplace[step].brand)){
+
+        brandList[count]=marketplace[step].brand;
+        count +=1;
+
+    }
+
+}
 // 2. Log the variable
+console.log(brandList);
 // 3. Log how many brands we have
+console.log(brandList.length);
 
 
 // 🎯 TODO: Sort by price
 // 1. Create a function to sort the marketplace products by price
+function sortingData(data,element) {
+  sortedData = data.sort((a,b)=>(a[element]>b[element])?1:-1);
+  return sortedData;
+}
 // 2. Create a variable and assign it the list of products by price from lowest to highest
-// 3. Log the variable
+marketplacesSprtedByPrice=sortingData(marketplace,"price");
 
+
+// 3. Log the variable
+console.log(marketplacesSprtedByPrice);
 
 // 🎯 TODO: Sort by date
 // 1. Create a function to sort the marketplace objects by products date
+function sortingData(data,element) {
+  sortedData = data.sort((a,b)=>(a[element]>b[element])?1:-1);
+  return sortedData;}
 // 2. Create a variable and assign it the list of products by date from recent to old
-// 3. Log the variable
+marketplacesSprtedByDate=sortingData(marketplace,"date");
 
+// 3. Log the variable
+console.log(marketplacesSprtedByDate);
 
 // 🎯 TODO: Filter a specific price range
 // 1. Filter the list of products between 50€ and 100€
+function filteringData(data,element,min,max) {
+  filteredData = data.filter(datum=>((datum[element]>=min) && datum[element]<=100));
+  return filteredData;}
 // 2. Log the list
+dataFiltered=(marketplace,"price",50,100);
+console.log(dataFiltered);
 
 
 // 🎯 TODO: Average price
 // 1. Determine the average price of the marketplace
+function average(data,element) {
+  avg= data.reduce((a,b)=> a+b[element],0)/data.length;
+   return avg;
+}
+mean=average(marketplace,"price")
 // 2. Log the average
+console.log(mean)
 
 
 
@@ -92,6 +130,18 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // 1. Create an object called `brands` to manipulate products by brand name
 // The key is the brand name
 // The value is the array of products
+
+function creatingBrands(brandList, data,element,min,max) {
+  brands = {};
+//brands{marque1:[],marque2:[]}
+  for (let step = 0;step < brandList.length; step++){
+    brands[brandList[step]]=[];
+  }
+  marketplace.forEach(element => { brands[element.brand].push(element);
+    
+  });
+  return brands;}
+  brands=creatingBrands(brandList,marketplace)
 //
 // Example:
 // const brands = {
@@ -102,6 +152,7 @@ console.log(MY_FAVORITE_BRANDS[0]);
 // };
 //
 // 2. Log the variable
+console.log(brands)
 // 3. Log the number of products by brands
 
 
