@@ -154,17 +154,18 @@ function creatingBrands(brandList, data,element,min,max) {
 // 2. Log the variable
 console.log(brands)
 // 3. Log the number of products by brands
-
+Object.entries(brands).map(([key,value])=>console.log(value.length))
 
 // 🎯 TODO: Sort by price for each brand
 // 1. For each brand, sort the products by price, from highest to lowest
+Object.entries(brands).map(([key,value])=>console.log(key,sortingData(brands[key],"price")))
 // 2. Log the sort
 
 
 // 🎯 TODO: Sort by date for each brand
 // 1. For each brand, sort the products by date, from old to recent
 // 2. Log the sort
-
+Object.entries(brands).map(([key,value])=>console.log(key,sortingData(brands[key],"date")))
 
 
 
