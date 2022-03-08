@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
-
+// # for id . for class
 /**
  * Parse webpage e-shop
  * @param  {String} data - html response
@@ -9,25 +9,19 @@ const cheerio = require('cheerio');
 const parse = data => {
   const $ = cheerio.load(data);
 
-  return $('.productList-container .productList')
+  return $('.products-grid .item')
     .map((i, element) => {
       const name = $(element)
-        .find('.productList-title')
-        .text()
-        .trim()
-        .replace(/\s/g, ' ');
-      const price = parseInt(
-        $(element)
-          .find('.productList-price')
-          .text()
-      );
-      const link = 
-        $(element)
-          .find('.productList-link')
-          .attr('href')
+        .find('.product-name')
+        .find('a')
+        .attr('title');
+
+      const price = parseInt($(element)
+        .find('.price-box .price')
+        .text())
       ;
 
-      return {name, price,link};
+      return {name,price};
     })
     .get();
 };
