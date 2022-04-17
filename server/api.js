@@ -65,14 +65,14 @@ app.get('/products/search',async(request,response)=>{
   let product
   if(typeof price !== 'undefined'){
     let priceInt = parseInt(price);
-    if(brand === "All"){
+    if(brand === "all"){
       product = await db.find({"price":{"$lte":priceInt}})
     }
     else{
       product = await db.find({"price":{"$lte":priceInt},"brand":brand})
     }
   }
-  else if(brand !== "All"){
+  else if(brand !== "all"){
     product = await db.find({'brand':brand})
   }
   else{
