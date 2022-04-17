@@ -1,0 +1,2 @@
+https://clear-fashion-client-eight.vercel.app/
+https://clear-fashion-api-jade.vercel.app/

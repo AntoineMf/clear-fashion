@@ -1,7 +1,3 @@
-// Invoking strict mode https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode#invoking_strict_mode
-'use strict';
-
-// current products on the page
 let currentProducts = [];
 let currentPagination = {};
 
@@ -10,42 +6,51 @@ const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
 const sectionProducts = document.querySelector('#products');
 const spanNbProducts = document.querySelector('#nbProducts');
+const selectBrand = document.querySelector('#brand-select');;
+const selectLowprice = document.querySelector('#lowprice');
+const selectSort = document.querySelector('#sort-select');
 
 /**
  * Set global value
  * @param {Array} result - products to display
  * @param {Object} meta - pagination meta info
  */
-const setCurrentProducts = ({result, meta}) => {
+const setCurrentProducts = result => {
   currentProducts = result;
-  currentPagination = meta;
 };
 
 /**
  * Fetch products from api
  * @param  {Number}  [page=1] - current page to fetch
  * @param  {Number}  [size=12] - size of the page
- *
  * @return {Object}
  */
-const fetchProducts = async (page = 1, size = 12, brand="") => {
+const fetchProducts = async (page = 1, size = 12, brand="All") => {
   try {
     const response = await fetch(
-      `https://clear-fashion-api.vercel.app?page=${page}&size=${size}`
+      `https://clear-fashion-api-jade.vercel.app/products/search?page=${page}&size=${size}&brand=${brand}`
+      //?page=${page}&size=${size}&brand=${brand}&price=${price}
     );
+    
     const body = await response.json();
-
-    if (body.success !== true) {
-      console.error(body);
-      return {currentProducts, currentPagination};
-    }
-
-    return body.data;
+    console.log(body)
+    return body;
   } catch (error) {
     console.error(error);
     return {currentProducts, currentPagination};
   }
 };
+
+const filterByPrice = products => {
+  let filteredByPrice=[];
+  for (let i = 0; i < products.result.length; i++) {
+     if(parseInt(products.result[i]['price'])<=50){
+        filteredByPrice.push(products.result[i]);
+     }
+  }
+  products.result = filteredByPrice;
+  return products;
+}
 
 /**
  * Render list of products
@@ -57,10 +62,14 @@ const renderProducts = products => {
   const template = products
     .map(product => {
       return `
-      <div class="product" id=${product.uuid}>
-        <span>${product.brand}</span>
-        <a href="${product.link}">${product.name}</a>
-        <span>${product.price}</span>
+      <div class="product" id=${product._id}>
+        <p style="text-align:center;"><img src=${product.photo} alt="" width="500" height="600" class="center"> 
+        <br><a href="${product.link}">${product.name}</a>
+        <br>${product.brand.toUpperCase()}
+
+        
+        <br><span>${product.price} €</span></p>
+        
       </div>
     `;
     })
@@ -76,12 +85,18 @@ const renderProducts = products => {
  * Render page selector
  * @param  {Object} pagination
  */
-const renderPagination = pagination => {
-  const {currentPage, pageCount} = pagination;
-  const options = Array.from(
-    {'length': pageCount},
-    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
-  ).join('');
+ const renderPagination = async (pagination) => {
+  const response = await fetch(
+    `https://clear-fashion-api-jade.vercel.app/count`
+  );
+  const body = await response.json();
+  const pageCount = pagination.pageSize
+  const currentPage = pagination.currentPage
+  let options = ""
+
+  for(var i = 0; i < parseInt(body[0]/pageCount); i++){
+    options = options.concat('', `<option value="${i+1}">${i+1}</option>`)
+  }
 
   selectPage.innerHTML = options;
   selectPage.selectedIndex = currentPage - 1;
@@ -94,13 +109,13 @@ const renderPagination = pagination => {
 const renderIndicators = pagination => {
   const {count} = pagination;
 
-  spanNbProducts.innerHTML = count;
+  spanNbProducts.innerHTML = currentProducts.length;
 };
 
 const render = (products, pagination) => {
   renderProducts(products);
   renderPagination(pagination);
-  renderIndicators(pagination);
+  renderIndicators(products,pagination);
 };
 
 /**
@@ -110,22 +125,55 @@ const render = (products, pagination) => {
 /**
  * Select the number of products to display
  */
-selectShow.addEventListener('change', async (event) => {
-  const products = await fetchProducts(currentPagination.currentPage, parseInt(event.target.value));
-
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
+selectShow.addEventListener('change', event => {
+  currentPagination.pageSize=parseInt(event.target.value);
+  fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
 });
-selectPage.addEventListener('change', async (event) => {
-  const products = await fetchProducts(parseInt(event.target.value), currentPagination.pageSize);
+selectPage.addEventListener('change',event=>{
+  currentPagination.currentPage=parseInt(event.target.value);
+  fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+})
+selectBrand.addEventListener('change',event=>{
+  currentPagination.currentBrand=(event.target.value);
+  fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then(setCurrentProducts)
+      .then(() => render(currentProducts, currentPagination));
+})
 
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
-});
 
+var clickedPrice = true
+selectLowprice.addEventListener('click',event=>{
+  if(clickedPrice === false){
+    fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+      .then(setCurrentProducts)
+        .then(() => render(currentProducts, currentPagination));
+  }
+  else{
+    fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then((data) => {return filterByPrice(data);})
+        .then(setCurrentProducts)
+          .then(() => render(currentProducts, currentPagination));
+  }
+  clickedPrice = !clickedPrice
+})
+selectSort.addEventListener('change', event => {
+  if(event.target.value==='price-asc'){
+    fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then(setCurrentProducts)
+      .then(() => render(currentProducts.sort((a, b) => (a.price > b.price) ? 1 : -1), currentPagination));
+  }
+  else if(event.target.value==='price-desc'){
+    fetchProducts(currentPagination.currentPage,currentPagination.pageSize,currentPagination.currentBrand)
+    .then(setCurrentProducts)
+      .then(() => render(currentProducts.sort((a, b) => (a.price < b.price) ? 1 : -1), currentPagination));
+  }
+  });
 document.addEventListener('DOMContentLoaded', async () => {
   const products = await fetchProducts();
-
-  setCurrentProducts(products);
-  render(currentProducts, currentPagination);
+  await setCurrentProducts(products);
+  await render(currentProducts, currentPagination);
 });
