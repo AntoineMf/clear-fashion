@@ -1,7 +1,8 @@
 const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
-const db = require('./db');
+const { Db } = require('mongodb');
+const db = require('./db')
 
 const PORT = 8092;
 
@@ -15,51 +16,10 @@ app.use(helmet());
 
 app.options('*', cors());
 
-/*app.get('/test/:brand', async(request, response) => {
-  const loomOnly = await db.find({'brand':request.params.brand});
-  response.send(loomOnly);
-});*/
-app.get('/test/:price', async(request, response) => {
-  const loomOnly = await db.find({'price':{$lt:parseInt(request.params.price)}});
-  response.send(loomOnly);
-});
-
-app.get('/test', async(request, response) => {
-  
-  response.send({'ack':true})
-});
-app.get('/a', (request, response) => {
+app.get('/', (request, response) => {
   response.send({'ack': true});
 });
 
-app.get('/product/search', async(request, response) => {
-  const {limit,price,brand} = request.query;
-  let product;
-
-  /*if (typeof price !== 'undefined'){
-    let priceInt= parseInt(price);
-  }
-
-  //if (typeof limit !== 'undefined' && typeof brand !== )*/
-
-  product = await db.find({'price':{$lt:parseInt(price)}})
-  console.log(request.query)
-  response.send(product);
-});
-app.get('/product', async(request, response) => {
-  const {limit,price,brand} = request.query;
-  let product;
-
-  /*if (typeof price !== 'undefined'){
-    let priceInt= parseInt(price);
-  }
-
-  //if (typeof limit !== 'undefined' && typeof brand !== )*/
-
-  product = await db.find({'price':{$lt:parseInt(price)},'brand':brand})
-  console.log(request.query)
-  response.send(product);
-});
 app.get('/products/search',async(request,response)=>{
   const {price,brand,page,size}=request.query;
   let product
@@ -117,8 +77,7 @@ app.get('/count', async (request, response) => {
 
   response.send(result)
 
-} );
-
+} )
 app.listen(PORT);
 
 console.log(`📡 Running on port ${PORT}`);
